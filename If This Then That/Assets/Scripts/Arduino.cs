@@ -11,7 +11,7 @@ public class Arduino : MonoBehaviour
     [SerializeField] private int baudrate = 9600;
     private const string buttonA = "D8";
     [HideInInspector] public bool buttonAState = false;
-    private const string buttonB = "D2";
+    private const string buttonB = "D7";
     [HideInInspector] public bool buttonBState = false;
     private const string weight = "SCALE";
     [HideInInspector] public float weightState = 0;
@@ -63,12 +63,12 @@ public class Arduino : MonoBehaviour
             if (buttonAState)
             {
                 countdownTimer.gameEnded = true;
-                Debug.Log("D1 was pressed");
+                Debug.Log("D8 was pressed");
             }
             if (buttonBState)
             {
-                //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-                Debug.Log("D2 was pressed");
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                Debug.Log("D7 was pressed");
             }
             textMesh.text = Mathf.CeilToInt(weightState) + " Grams";
         }
