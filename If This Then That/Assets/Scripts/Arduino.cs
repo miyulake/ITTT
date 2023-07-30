@@ -1,20 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.IO.Ports;
 using TMPro;
 
 public class Arduino : MonoBehaviour
 {
-    SerialPort serial;
-    [SerializeField] int baudrate = 9600;
-    [SerializeField] const string buttonA = "D8";
-    bool buttonAState = false;
-    [SerializeField] const string buttonB = "D2";
-    bool buttonBState = false;
-    [SerializeField] const string weight = "SCALE";
-    float weightState = 0;
+    private SerialPort serial;
+    [SerializeField] private int baudrate = 9600;
+    private const string buttonA = "D8";
+    [HideInInspector] public bool buttonAState = false;
+    private const string buttonB = "D2";
+    [HideInInspector] public bool buttonBState = false;
+    private const string weight = "SCALE";
+    [HideInInspector] public float weightState = 0;
 
+    [SerializeField] private CountdownTimer countdownTimer;
     [SerializeField] private TextMeshProUGUI textMesh;
 
     private void Awake()
@@ -49,29 +51,38 @@ public class Arduino : MonoBehaviour
             }
         }
 
-        // We should probably check if the serialPort was opened at all, otherwise show some error the controller isn't conn0ected
+        // We should probably check if the serialPort was opened at all, otherwise show some error the controller isn't connected
 
         Time.timeScale = 1;
     }
 
     private void Update()
     {
-        if (buttonAState)
+        if (!countdownTimer.gameEnded)
         {
-            Debug.Log("D1 was pressed");
+            if (buttonAState)
+            {
+                countdownTimer.gameEnded = true;
+                Debug.Log("D1 was pressed");
+            }
+            if (buttonBState)
+            {
+                //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                Debug.Log("D2 was pressed");
+            }
+            textMesh.text = Mathf.CeilToInt(weightState) + " Grams";
         }
-        textMesh.text = weightState.ToString();
     }
 
     private IEnumerator GetDataFromSerial()
     {
-        while (true)
+        while (!countdownTimer.gameEnded)
         {
             // Try to read serial
             try
             {
                 if (serial.BytesToRead > 0)
-                { 
+                {
                     string input = serial.ReadLine();
                     Debug.Log(input);
                     string[] splitInput = input.Split(",");
@@ -103,7 +114,7 @@ public class Arduino : MonoBehaviour
                 InitializeArduino();
             }
 
-            yield return new WaitForSecondsRealtime(0.05f); 
+            yield return new WaitForSecondsRealtime(0.05f);
         }
     }
 
@@ -118,7 +129,7 @@ public class Arduino : MonoBehaviour
 
         //foreach (byte b in buffer)
         //{
- 
+
         //}
         Debug.Log(serial.ReadExisting());
         //Debug.Log(buffer);
