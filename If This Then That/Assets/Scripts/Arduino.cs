@@ -17,7 +17,10 @@ public class Arduino : MonoBehaviour
     [HideInInspector] public float weightState = 0;
 
     [SerializeField] private CountdownTimer countdownTimer;
-    [SerializeField] private TextMeshProUGUI textMesh;
+    [SerializeField] private TextMeshProUGUI weightTextMesh;
+    [SerializeField] private TextMeshProUGUI arduinoTextMesh;
+    [HideInInspector] public float resultWeight;
+    private bool hasStoredWeight;
 
     private void Awake()
     {
@@ -27,6 +30,40 @@ public class Arduino : MonoBehaviour
     private void Start()
     {
         StartCoroutine(GetDataFromSerial());
+        hasStoredWeight = false;
+    }
+
+
+    private void Update()
+    {
+        // Button for resetting game
+        if (buttonBState)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Debug.Log("D7 was pressed");
+        }
+        if (!countdownTimer.gameEnded)
+        {
+            // Button for ending game
+            if (buttonAState)
+            {
+                countdownTimer.gameEnded = true;
+                Debug.Log("D8 was pressed");
+            }
+            // For debugging purposes
+            weightTextMesh.text = Mathf.CeilToInt(weightState) + " Grams";
+        }
+        else
+        {
+            // Store weight seperately to keep the Arduino running
+            if (!hasStoredWeight)
+            {
+                resultWeight = weightState;
+                hasStoredWeight = true;
+            }
+            weightTextMesh.text = Mathf.CeilToInt(resultWeight) + " Grams";
+        }
+        if (Input.GetKeyDown(KeyCode.Escape)) Application.Quit();
     }
 
     private void InitializeArduino()
@@ -43,6 +80,7 @@ public class Arduino : MonoBehaviour
                 serial.DataReceived += new SerialDataReceivedEventHandler(OnSerialDataReceived);
                 serial.Open();
 
+                arduinoTextMesh.text = "Arduino connected!";
                 Debug.Log($"Arduaaano found on port {portName}");
             }
             catch
@@ -52,31 +90,12 @@ public class Arduino : MonoBehaviour
         }
 
         // We should probably check if the serialPort was opened at all, otherwise show some error the controller isn't connected
-
         Time.timeScale = 1;
-    }
-
-    private void Update()
-    {
-        if (!countdownTimer.gameEnded)
-        {
-            if (buttonAState)
-            {
-                countdownTimer.gameEnded = true;
-                Debug.Log("D8 was pressed");
-            }
-            if (buttonBState)
-            {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-                Debug.Log("D7 was pressed");
-            }
-            textMesh.text = Mathf.CeilToInt(weightState) + " Grams";
-        }
     }
 
     private IEnumerator GetDataFromSerial()
     {
-        while (!countdownTimer.gameEnded)
+        while (true)
         {
             // Try to read serial
             try
@@ -110,6 +129,7 @@ public class Arduino : MonoBehaviour
             catch
             {
                 // Do something if controller isn't found
+                arduinoTextMesh.text = "Connect Arduino first!";
                 Debug.Log("Arduino not found, pls fix");
                 InitializeArduino();
             }

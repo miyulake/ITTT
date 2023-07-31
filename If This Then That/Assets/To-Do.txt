@@ -1,0 +1,3 @@
+Bugs:
+* It's possible to end the game on the start screen resulting in bugged scores.
+(FIXED) When the game ends the restart button seizes to work, due to the arduino not sending data anymore.

@@ -18,8 +18,9 @@ public class ResultScore : MonoBehaviour
         {
             if (!weightGoal.isOverweight)
             {
-                int weightBonus = Mathf.CeilToInt((Mathf.Abs(weightGoal.targetWeight - arduino.weightState) / weightGoal.targetWeight * -1 + 1) * perfectBonus);
+                int weightBonus = Mathf.CeilToInt((Mathf.Abs(weightGoal.targetWeight - arduino.resultWeight) / weightGoal.targetWeight * -1 + 1) * perfectBonus);
                 int timeBonus = Mathf.CeilToInt(countdownTimer.timer * 1000);
+                if (countdownTimer.timer <= 0) timeBonus = 0;
                 scoreTextMesh.text = "Time bonus: " + timeBonus + "\n" + "Weight bonus: " + weightBonus + "\n" + "Score: " + (weightBonus + timeBonus).ToString();
             }
             else

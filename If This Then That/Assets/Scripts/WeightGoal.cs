@@ -21,7 +21,7 @@ public class WeightGoal : MonoBehaviour
 
     private void Update()
     {
-        if (arduino.weightState > (targetWeight * 1.33f))
+        if (arduino.weightState > (targetWeight * 1.33f) && !countdownTimer.gameEnded)
         {
             isOverweight = true;
             countdownTimer.gameEnded = true;
